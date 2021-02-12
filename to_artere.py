@@ -116,8 +116,8 @@ def to_artere(net,filename):
 
     # Loads
     for bus_index, p_mw, q_mvar, scaling in zip(net.load.bus, net.load.p_mw, net.load.q_mvar, net.load.scaling):
-        bus_dict[bus_index]['Pload'] = format(p_mw, '.3f')
-        bus_dict[bus_index]['Qload'] = format(q_mvar, '.3f')
+        bus_dict[bus_index]['Pload'] = format(p_mw, '.6f')
+        bus_dict[bus_index]['Qload'] = format(q_mvar, '.6f')
 
 
     # Shunts

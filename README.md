@@ -13,7 +13,7 @@ This project contains two files.
 2) The file to_artere, converts a network from Pandapower to ARTERE 
 
 
-* ##  How it Works: 
+ ##  How it Works: 
 If you want to convert a network from ARTERE to Pandapower, you must insert the program to the same folder with your project and all you have to type is:
 
   `import from_artere` 

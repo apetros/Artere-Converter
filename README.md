@@ -36,6 +36,9 @@ While we are iterating, we  check what is the type of the record. According to t
 * Converting a Pandapower network to ARTERE network is a pretty similar process. Iterating through  net elements, we parse the data and store them in dictionaries. After finishing with this proccess, we create a file with ".dat" extension and we create Strings in proper form and store them in the new file. 
 
 
+## Results 
+You can find two networks, database and 6bus in both forms in this repository. You can try and check the results if you run power flow analysis with ARTERE and Pandapower
+
 
 ## Required software
 

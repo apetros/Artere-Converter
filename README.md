@@ -33,7 +33,7 @@ Secondly we are checking for comments and getting rid of them. After getting rid
 Then we iterate with a for loop through each line. 
 While we are iterating, we  check what is the type of the record. According to the type of record, we parse the data. After parsing the data we create Strings in a proper form and we store them in lists. After we finish with parsing, we create a new file with ".py" and we move the strings from the lists to the new file. 
 
-* Converting a Pandapower network to ARTERE network is a pretty similar process. Iterating through a net elements, we parse the data and store them in dictionaries. After finishing with this proccess, we create a file with ".dat" extension and we create Strings in proper form and store them in the new file. 
+* Converting a Pandapower network to ARTERE network is a pretty similar process. Iterating through  net elements, we parse the data and store them in dictionaries. After finishing with this proccess, we create a file with ".dat" extension and we create Strings in proper form and store them in the new file. 
 
 
 

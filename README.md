@@ -15,12 +15,16 @@ This project contains two files.
 
 * ##  How it Works: 
 If you want to convert a network from ARTERE to Pandapower, you must insert the program to the same folder with your project and all you have to type is:
-import from_artere 
-from_artere.from_artere("name_of_the_file.dat") 
+
+  `import from_artere` 
+  
+   `from_artere.from_artere("name_of_the_file.dat") `
 
 Similarly, If you want to convert a network from Pandapower to ARTERE, you must type: 
-import to_artere 
-to_artere.to_artere("name_of_the_file.py") 
+
+   `import to_artere` 
+   
+   `to_artere.to_artere("name_of_the_file.py")`
 
 
 ##  Explain the code: 

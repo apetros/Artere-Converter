@@ -30,50 +30,11 @@ gen_num = 1
 sgen_num = 1
 switch_num = 1
 
+
 def check_status(element_status):
-    in_service = ""
     if element_status == True:
-        in_service = 1
-    elif element_status == False:
-        in_service = 0
-    return in_service
-
-
-def modify_name(element_name, element_name_list):
-    element_name = str(element_name)
-    if len(element_name) > 20:
-        element_name = element_name[:20]
-    element_name = element_name.replace(" ", "_")
-
-    if element_name in element_name_list:
-        if len(element_name) < 20:
-            if element_name_list == line_name_list:
-                global line_num
-                if element_name == 'None':
-                    element_name = 'Line'
-            if element_name in element_name_list:
-                element_name = 'Line'
-                element_name = element_name + str(line_num)
-                line_num = line_num + 1
-            if element_name_list == trafo_name_list:
-                global trafo_num
-                if element_name == 'None':
-                    element_name = 'Trafo'
-                element_name = element_name + str(trafo_num)
-                trafo_num = trafo_num + 1
-            if element_name_list == gen_name_list:
-                global gen_num
-                if element_name == 'None':
-                    element_name = 'gen'
-                element_name = element_name + str(gen_num)
-                gen_num = gen_num + 1
-            if element_name_list == sgen_name_list:
-                global sgen_num
-                if element_name == 'None':
-                   element_name = 'sgen'
-                element_name = element_name + str(sgen_num)
-                sgen_num = sgen_num + 1
-    return element_name
+        return 1
+    return 0
 
 
 def modify_lines(line_name):
@@ -84,7 +45,7 @@ def modify_lines(line_name):
 
 def modify_bus_name(bus_name):
     if type(bus_name) == int:
-        bus_name = "b"+str(bus_name)
+        bus_name = "b" + str(bus_name)
     else:
         bus_name = str(bus_name)
         if len(bus_name) > 8:
@@ -98,10 +59,9 @@ def modify_bus_name(bus_name):
     return bus_name
 
 
-def to_artere(net,filename):
+def to_artere(net, filename):
     global frequency
     global wrong_switch_type
-
 
     # Frequency
     frequency = net.f_hz
@@ -119,12 +79,11 @@ def to_artere(net,filename):
         bus_dict[bus_index]['Pload'] = format(p_mw, '.6f')
         bus_dict[bus_index]['Qload'] = format(q_mvar, '.6f')
 
-
     # Shunts
     try:
         for bus_index, q_mvar, p_mw in zip(net.shunt.bus, net.shunt.q_mvar, net.shunt.p_mw):
             bus_dict[bus_index]['Qshunt'] = q_mvar
-            #bus_dict[bus_index]['Bshunt'] = p_mw
+            # bus_dict[bus_index]['Bshunt'] = p_mw
     except:
         pass
     pprint(bus_dict)
@@ -132,9 +91,10 @@ def to_artere(net,filename):
     df = net.line
     # Lines
     for line_index, name, from_bus, to_bus, length, Ohm_per_km, x_Ohm_per_km, capacitance_per_km, Imax, status in zip \
-                (df.index, df.name, df.from_bus, df.to_bus, df.length_km, df.r_ohm_per_km, df.x_ohm_per_km, df.c_nf_per_km, df.max_i_ka, df.in_service):
+                (df.index, df.name, df.from_bus, df.to_bus, df.length_km, df.r_ohm_per_km, df.x_ohm_per_km,
+                 df.c_nf_per_km, df.max_i_ka, df.in_service):
         line_dict[line_index] = {}
-        line_dict[line_index]['name'] = modify_name(name,line_name_list)
+        line_dict[line_index]['name'] = name
         line_name_list.append(line_dict[line_index]['name'])
         line_dict[line_index]['from_bus'] = bus_dict[from_bus]['bus_name']
         line_dict[line_index]['to_bus'] = bus_dict[to_bus]['bus_name']
@@ -157,9 +117,10 @@ def to_artere(net,filename):
     # Generators
     df = net.gen
     for gen_index, name, bus, p_mw, vm_pu, sn_mva, min_q_mvar, max_q_mvar, slack, status in \
-            zip(df.index, df.name, df.bus, df.p_mw, df.vm_pu, df.sn_mva, df.min_q_mvar, df.max_q_mvar, df.slack, df.in_service):
+            zip(df.index, df.name, df.bus, df.p_mw, df.vm_pu, df.sn_mva, df.min_q_mvar, df.max_q_mvar, df.slack,
+                df.in_service):
         gen_dict[gen_index] = {}
-        gen_dict[gen_index]['name'] = modify_name(name,gen_name_list)
+        gen_dict[gen_index]['name'] = name
         gen_name_list.append(gen_dict[gen_index]['name'])
         gen_dict[gen_index]['con_bus'] = bus_dict[bus]['bus_name']
         gen_dict[gen_index]['mon_bus'] = bus_dict[bus]['bus_name']
@@ -178,9 +139,10 @@ def to_artere(net,filename):
     # Static generators
     df = net.sgen
     try:
-        for sgen_index, name, bus, p_mw, q_mvar, sn_mva, status in zip (df.index, df.name, df.bus, df.p_mw, df.q_mvar, df.sn_mva, df.in_service):
+        for sgen_index, name, bus, p_mw, q_mvar, sn_mva, status in zip(df.index, df.name, df.bus, df.p_mw, df.q_mvar,
+                                                                       df.sn_mva, df.in_service):
             sgen_dict[sgen_index] = {}
-            sgen_dict[sgen_index]['name'] = modify_name(name, sgen_name_list)
+            sgen_dict[sgen_index]['name'] = name
             sgen_name_list.append(sgen_dict[sgen_index]['name'])
             sgen_dict[sgen_index]['con_bus'] = bus_dict[bus]['bus_name']
             sgen_dict[sgen_index]['mon_bus'] = bus_dict[bus]['bus_name']
@@ -213,10 +175,11 @@ def to_artere(net,filename):
     # Switches
     df = net.switch
     try:
-        for switch_index, bus, element, et, closed, name in zip(df.index, df.bus, df.element, df.et, df.closed, df.name):
+        for switch_index, bus, element, et, closed, name in zip(df.index, df.bus, df.element, df.et, df.closed,
+                                                                df.name):
             if et == 'b':
                 switch_dict[switch_index] = {}
-                switch_dict[switch_index]['name'] = modify_name(name, switch_name_list)
+                switch_dict[switch_index]['name'] = name
                 switch_name_list.append(switch_dict[switch_index]['name'])
                 switch_dict[switch_index]['first_bus'] = bus_dict[bus]['bus_name']
                 switch_dict[switch_index]['second_bus'] = bus_dict[element]['bus_name']
@@ -231,9 +194,11 @@ def to_artere(net,filename):
     # Transformers
     df = net.trafo
     for trafo_index, name, hv_bus, lv_bus, sn_mva, vn_hv_kv, vn_lv_kv, vk_percent, vkr_percent, i0_percent, shift_degree, tap_side, tap_neutral, tap_min, tap_max, tap_step_percent, tap_step_degree, tap_pos, status in zip \
-                (df.index, df.name, df.hv_bus, df.lv_bus, df.sn_mva, df.vn_hv_kv, df.vn_lv_kv, df.vk_percent, df.vkr_percent, df.i0_percent, df.shift_degree, df.tap_side, df.tap_neutral, df.tap_min, df.tap_max, df.tap_step_percent, df.tap_step_degree, df.tap_pos, df.in_service):
+                (df.index, df.name, df.hv_bus, df.lv_bus, df.sn_mva, df.vn_hv_kv, df.vn_lv_kv, df.vk_percent,
+                 df.vkr_percent, df.i0_percent, df.shift_degree, df.tap_side, df.tap_neutral, df.tap_min, df.tap_max,
+                 df.tap_step_percent, df.tap_step_degree, df.tap_pos, df.in_service):
         trafo_dict[trafo_index] = {}
-        trafo_dict[trafo_index]['name'] = modify_name(name, trafo_name_list)
+        trafo_dict[trafo_index]['name'] = name
         trafo_name_list.append(trafo_dict[trafo_index]['name'])
         trafo_dict[trafo_index]['from_bus'] = bus_dict[lv_bus]['bus_name']
         trafo_dict[trafo_index]['to_bus'] = bus_dict[hv_bus]['bus_name']
@@ -245,7 +210,7 @@ def to_artere(net,filename):
         # find R, X, C
         zk = vk_percent
         rk = vkr_percent
-        xk = math.sqrt(pow(zk,2) - pow(rk,2))
+        xk = math.sqrt(pow(zk, 2) - pow(rk, 2))
 
         B = i0_percent / 100
         trafo_dict[trafo_index]['X'] = xk
@@ -265,26 +230,26 @@ def to_artere(net,filename):
         # TAPS
         # Number of positions
         try:
-            trafo_dict[trafo_index]['NBPOS'] = (tap_max - tap_min +1 )
+            trafo_dict[trafo_index]['NBPOS'] = (tap_max - tap_min + 1)
         except:
             trafo_dict[trafo_index]['NBPOS'] = 0
         if pd.isnull(tap_max):
             trafo_dict[trafo_index]['NBPOS'] = 0
 
-         # First & Last
+        # First & Last
         if tap_step_percent == 0:
             N_First = 0
             N_Last = 0
-        else:                           #abs
-            N_First= 100 - (tap_neutral - (tap_min)) * tap_step_percent
+        else:  # abs
+            N_First = 100 - (tap_neutral - (tap_min)) * tap_step_percent
             N_Last = (tap_max - tap_neutral) * tap_step_percent + 100
 
         # N ratio
-        if pd.isnull(tap_pos) or tap_pos == 0:      # If tap position is zero or null, Nratio is 100%
+        if pd.isnull(tap_pos) or tap_pos == 0:  # If tap position is zero or null, Nratio is 100%
             trafo_dict[trafo_index]['N_ratio'] = 100
         else:
             trafo_dict[trafo_index]['N_ratio'] = (tap_pos - tap_neutral) * tap_step_percent + 100
-            #tap_step_percent * (tap_neutral - tap_pos) + 100
+            # tap_step_percent * (tap_neutral - tap_pos) + 100
 
         if tap_pos == tap_min and tap_pos == tap_max:
             N_First = N_Last = 0
@@ -294,12 +259,10 @@ def to_artere(net,filename):
         trafo_dict[trafo_index]['N_First'] = N_First
         trafo_dict[trafo_index]['N_Last'] = N_Last
 
-
         if pd.isnull(N_First):
             trafo_dict[trafo_index]['N_First'] = 0
-        if  pd.isnull(N_Last):
+        if pd.isnull(N_Last):
             trafo_dict[trafo_index]['N_Last'] = 0
-
 
         trafo_dict[trafo_index]['status'] = check_status(status)
 
@@ -307,7 +270,6 @@ def to_artere(net,filename):
 
 
 def create_dat_file(filename):
-
     # Buses
     for index in range(len(bus_dict)):
         bus_record = f"BUS\t{bus_dict[index]['bus_name']}\t{bus_dict[index]['vn_kv']}\t{bus_dict[index].get('Pload', 0)}\t{bus_dict[index].get('Qload', 0)}\t{bus_dict[index].get('Bshunt', 0)}\t{bus_dict[index].get('Qshunt', 0)}\t;\n"
@@ -338,11 +300,6 @@ def create_dat_file(filename):
         transfo_record = f"TRFO\t{trafo_dict[index]['name']}\t{trafo_dict[index]['from_bus']}\t{trafo_dict[index]['to_bus']}\t{trafo_dict[index]['con_bus']}\t{trafo_dict[index]['R']}\t{trafo_dict[index]['X']}\t{trafo_dict[index]['B']}\t{trafo_dict[index]['N_ratio']}\t{trafo_dict[index]['sn_mva']}\t{trafo_dict[index]['N_First']}\t{trafo_dict[index]['N_Last']}\t{trafo_dict[index]['NBPOS']}\t0\t0\t{trafo_dict[index]['status']}\t;\n"
         trafo_record_list.append(transfo_record)
 
-    # # Transformers  TRANSFO
-    # for index in range(len(trafo_dict)):
-    #     transfo_record = f"TRANSFO\t{trafo_dict[index]['name']}\t{trafo_dict[index]['from_bus']}\t{trafo_dict[index]['to_bus']}\t{trafo_dict[index]['con_bus']}\t{trafo_dict[index]['R']}\t{trafo_dict[index]['X']}\t{trafo_dict[index]['B']}\t{trafo_dict[index]['N_ratio']}\t{trafo_dict[index]['sn_mva']}\t{trafo_dict[index]['N_First']}\t{trafo_dict[index]['N_Last']}\t{trafo_dict[index]['NBPOS']}\t0\t1\t{trafo_dict[index]['status']}\t;\n"
-    #     trafo_record_list.append(transfo_record)
-    #
 
     # Switches
     for index in range(len(switch_dict)):
@@ -379,5 +336,3 @@ def create_dat_file(filename):
             Artere_file.write(slack)
 
         Artere_file.write(f'FNOM\t{frequency}\t;\n')
-
-

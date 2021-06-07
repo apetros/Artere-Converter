@@ -19,18 +19,9 @@ busDict = {}
 bus_voltage_dict = {}
 genDict = {}
 recordList = []
+controllersList = []
 
 
-def check_for_int_bus(bus_name):
-    # This function checks if a bus is consisted only from numbers
-    try:
-        bus_name = int(bus_name)
-    except:
-        pass
-    if type(bus_name) == int:
-        bus_name = str(bus_name)
-        bus_name = "b" + bus_name
-    return bus_name
 
 
 def checkStatus(element_status):
@@ -67,7 +58,6 @@ def from_artere(inputFile):
     for record in recordList:
         if record[0] == 'BUS':
             bus_name = record[1]
-            bus_name = check_for_int_bus(bus_name)
             vn_kv = float(record[2])
             Pload = float(record[3])
             Qload = float(record[4])
@@ -114,8 +104,7 @@ def from_artere(inputFile):
             Snom = float(record[7])
             status = checkStatus(int(record[8]))
 
-            from_bus = check_for_int_bus(from_bus)
-            to_bus = check_for_int_bus(to_bus)
+
 
             if Snom == 0:
                 Snom = 9999
@@ -145,26 +134,22 @@ def from_artere(inputFile):
             transfo_name = record[1]
             from_bus = record[2]
             to_bus = record[3]
-            Resistance = float(record[4])
-            Xreactance = float(record[5])
+            rk = float(record[4]) # Resistance Ohm
+            xk = float(record[5]) # Reactance
             SusceptanceB1 = float(record[6])
             SusceptanceB2 = float(record[7])
             N_ratio = float(record[8])
-            Susceptance = (SusceptanceB1 + SusceptanceB2) / 2.0
+            ym = (SusceptanceB1 + SusceptanceB2) / 2.0
             Snom = float(record[10])
             status = int(record[11])
             PHI = float(record[9])
 
-            to_bus = check_for_int_bus(to_bus)
-            from_bus = check_for_int_bus(from_bus)
+
             status = checkStatus(status)
 
             # vk, vkr, i0_percent
-            ym = Susceptance
-            rk = Resistance
-            xk = Xreactance
-            zk = math.sqrt(pow(rk, 2) + pow(xk, 2))
-            vk_percent = zk
+
+            vk_percent = math.sqrt(pow(rk, 2) + pow(xk, 2))  # zk
             vkr_percent = rk
             i0_percent = ym
 
@@ -239,8 +224,11 @@ def from_artere(inputFile):
                 On_off = int(record[15])
 
             status = checkStatus(On_off)
-            to_bus = check_for_int_bus(to_bus)
-            from_bus = check_for_int_bus(from_bus)
+
+
+            # if TOLV != "0" and VDES != "0":
+            #     CreateController = f"ContinuousTapControl(net, tid, vm_set_pu={VDES}, tol={TOLV}, side='{tap_side}', trafotype='2W', in_service=True) \n"
+            #     controllersList.append(CreateController)
 
             # vkr, vk, i0 percent
             Ym = Susceptance
@@ -415,7 +403,8 @@ def createNewFile(file):
     newPythonFile = file.split('.')[0] + ".py"
 
     with open(newPythonFile, 'w') as pythonFile:
-        pythonFile.write(f"""import pandapower as pp
+        pythonFile.write(f"""import pandapower as pp 
+from pandapower.control.controller.trafo.ContinuousTapControl import ContinuousTapControl
 
 net = pp.create_empty_network(f_hz={frequency}, sn_mva={100})
     
@@ -447,6 +436,10 @@ net = pp.create_empty_network(f_hz={frequency}, sn_mva={100})
         pythonFile.write('\n\n# List of Switches:\n')
         for switch in switchList:
             pythonFile.write(switch)
+
+        pythonFile.write('\n\n# List of controllers:\n')
+        for controller in controllersList:
+            pythonFile.write(controller)
 
         pythonFile.write(f"""
 init_va_degree_list = {init_va_degree_list} 
